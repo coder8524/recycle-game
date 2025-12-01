@@ -11,18 +11,29 @@ trash_items = ["batteryimg","bottleimg","chipsimg","trash bag"]
 actors = []
 animations = []
 game_done = False
-game_over = False
+gameover = False
 
 
 def draw():
     screen.blit("world",(0,0))
 
-    for actor in actors:
-        actor.draw()
-        if game_over():
-            screen.draw.text("game over", fontsize = 40, color = "red",(400,300))
+    if gameover:
+        screen.draw.text("game over",(400,300), fontsize = 80, color = "red")
+
+    elif game_done:
+        screen.draw.text("victory!!!",(400,300), fontsize = 80, color = "green")
+    
+    else:
+       for actor in actors:
+            actor.draw()
+    
+   
     
     
+def game_compleet():
+    global game_done
+    if current_level >= 6:
+        game_done = True
 
 
 
@@ -48,12 +59,19 @@ def create_actors():
         actor.pos = position * gapsize, 0
     
     for actor in actors:
-        animation = animate(actor, y = HEIGHT,duration = 5)
+        animation = animate(actor, y = HEIGHT,duration = 5, on_finished = game_over)
         animations.append(animation)
+
         
-def gameover():
-    global game_over
-    game_over = True
+def game_over():
+    global gameover
+    gameover = True
+
+
+def stop_animation():
+    for animation in animations:
+        if animation.running:
+            animation.stop()
     
 
         
@@ -62,11 +80,15 @@ def on_mouse_down(pos):
     for actor in actors:
         if actor.collidepoint(pos):
             if actor.image == "paperimg":
+                stop_animation()
                 current_level += 1
-                actors.clear()
-                create_actors()
+                if current_level >= 6:
+                    game_compleet()
+                else:                    
+                    actors.clear()
+                    create_actors()
             else:
-                gameover()
+                game_over()
 
 
 
